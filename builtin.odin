@@ -6,6 +6,20 @@ import "core:os/os2"
 import "core:sys/unix"
 import "core:strings"
 import "core:slice"
+import _c "core:c"
+
+foreign import libc "system:c"
+
+foreign libc {
+	@(link_name = "waitpid")
+	_unix_waitpid :: proc(pid: _c.int, status: ^_c.int, opts: _c.int) -> _c.int ---
+	@(link_name = "WIFEXITED")
+	_WIFEXITED :: proc(status: _c.int) -> _c.int ---
+	@(link_name = "WIFSIGNALED")
+	_WIFSIGNALED :: proc(status: _c.int) -> _c.int ---
+}
+
+WUNTRACED :: 0x01
 
 raven_cd :: proc(path: string) -> int {
 	if len(path) < 1 {
@@ -69,6 +83,33 @@ raven_help :: proc() -> bool {
 
 raven_exit :: proc() -> bool {
 	return false // This will kill cause of exec return, but could probably do a thread mem pass
+}
+
+raven_launch :: proc(args: []string) -> bool {
+	fmt.println("Attempting to launch:", args)
+	status: _c.int
+	pid, err := os.fork()
+	if err != os.ERROR_NONE {
+		fmt.eprintln("ERROR CREATING FORK x(")
+	}
+	if (pid == 0) {
+		// Child Process
+		if (os.execvp(args[0], args) == -1) {
+			fmt.eprintln("Forking process error")
+		}
+		os.exit(1)
+	} else if (pid < 0) {
+		fmt.eprintln("Forking error happenend")
+		return false
+	} else {
+		// Parent Process
+		for _WIFEXITED(status) <= 0 && _WIFSIGNALED(status) <= 0 {
+			wpid := _unix_waitpid(_c.int(pid), &status, WUNTRACED)
+			fmt.println("WPID: ", wpid)
+		}
+	}
+
+	return false
 }
 
 /*raven_builtins_str : []string : ["cd", "help", "ls", "exit"]
