@@ -100,10 +100,10 @@ raven_launch :: proc(args: []string) -> bool {
 		os.exit(1)
 	} else if (pid < 0) {
 		fmt.eprintln("Forking error happenend")
-		return false
 	} else {
 		// Parent Process
 		for _WIFEXITED(status) <= 0 && _WIFSIGNALED(status) <= 0 {
+			fmt.println("Looping...")
 			wpid := _unix_waitpid(_c.int(pid), &status, WUNTRACED)
 			fmt.println("WPID: ", wpid)
 		}
