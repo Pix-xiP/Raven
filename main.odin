@@ -1,4 +1,4 @@
-package main
+package raven
 
 import "core:fmt"
 import "core:mem"
@@ -83,18 +83,14 @@ raven_exec :: proc(args: []string) -> bool {
 	}
 
 	for i in 0 ..< len(args) {
-		if str.compare("cd", args[i]) == 0 {
-			if i + 1 < len(args) do raven_cd(args[i + 1])
-		}
-		if str.compare("ls", args[i]) == 0 {
-			raven_ls(args[i])
-		}
-		if str.compare("help", args[i]) == 0 {
-			raven_help()
-		}
-		if str.compare("exit", args[i]) == 0 {
-			raven_exit()
-			return false
+		exec := raven_builtin_fn[args[i]]
+		if exec != nil {
+			exec(args)
+			break
+		} else {
+			fmt.println("Unknown Builtin - Running LAUNCH!")
+			fmt.println("Unimplemented")
+			break
 		}
 		if str.compare("run", args[i]) == 0 {
 			raven_launch(args)
