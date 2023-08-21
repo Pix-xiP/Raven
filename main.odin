@@ -97,7 +97,7 @@ raven_exec :: proc(args: []string) -> bool {
 			return false
 		}
 		if str.compare("run", args[i]) == 0 {
-			raven_exec(args)
+			raven_launch(args)
 		}
 	}
 	return true

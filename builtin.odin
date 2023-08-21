@@ -94,6 +94,7 @@ raven_launch :: proc(args: []string) -> bool {
 	}
 	if (pid == 0) {
 		// Child Process
+		fmt.println("OS Exit as Child")
 		if (os.execvp(args[0], args) == -1) {
 			fmt.eprintln("Forking process error")
 		}
