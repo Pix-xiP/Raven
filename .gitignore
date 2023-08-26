@@ -2,3 +2,4 @@ deny/root_file
 Raven.o
 Raven.dSYM/Contents
 Raven
+core_utils/echo/echo
