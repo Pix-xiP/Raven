@@ -2,6 +2,7 @@ package coreutils
 
 import "core:fmt"
 import "core:os"
+import "core:os/os2"
 import sv "../system_vars"
 import str "core:strings"
 
@@ -57,6 +58,7 @@ By default the following sequences are recognised:
 		)
 		fmt.printf(sv.USAGE_BUILTIN_WARNING, PROGRAM_NAME)
 	}
+	os.exit(status)
 }
 
 show_version :: proc(status: int) {
@@ -88,14 +90,13 @@ hextobin :: proc(c: rune) -> int {
 	}
 }
 
-echo :: proc() {
+echo :: proc(args: []string) {
 	display_return: bool = true
-	argc := len(os.args)
-	argv := os.args[1:]
+	argc := len(args)
+	argv := args
 	just_echo: bool = false
 	when ODIN_DEBUG {
-		fmt.println(os.args)
-		fmt.println(os.args[1:])
+		fmt.println(args)
 	}
 	// Check for quick kills
 	if argc == 2 {
@@ -160,5 +161,5 @@ echo :: proc() {
 // }
 
 main :: proc() {
-	echo()
+	echo(os.args[1:])
 }

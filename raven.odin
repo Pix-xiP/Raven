@@ -35,7 +35,7 @@ main :: proc() {
 	}
 
 	// Starting shell forever loop here.
-	raven_shell_loop()
+	// raven_shell_loop()
 }
 
 // Ideas...
@@ -97,56 +97,75 @@ raven_read_line :: proc() -> string {
 }
 
 raven_split_line :: proc(line: string) -> []string {
+	//
+	// tokens := make([dynamic]string)
+	// err: mem.Allocator_Error
+	//
+	// pre_token: str.Builder
+	// str.builder_init_none(&pre_token)
+	// escape_next: bool = false
+	//
+	// for c in line {
+	//
+	// 	// If its escaped, write next rune regardless
+	// 	if escape_next {
+	// 		fmt.println("Escaped boi!")
+	// 		str.write_encoded_rune(&pre_token, c)
+	// 		escape_next = false
+	// 		continue
+	// 	}
+	// 	// If its a splitter:
+	// 	if raven_delim_split(c) {
+	// 		fmt.println("Splitter, writing token:", pre_token)
+	// 		// Turn pre_token into real token!
+	// 		append(&tokens, str.to_string(pre_token))
+	// 		str.builder_destroy(&pre_token)
+	// 		str.builder_init_none(&pre_token)
+	// 		continue
+	// 	}
+	//
+	// 	if c == '\\' {
+	// 		fmt.println("Next Char is escapted")
+	// 		escape_next = true
+	// 		continue
+	// 	}
+	//
+	// 	// Add it to the pre_token string.
+	// 	fmt.println("Writing Encoded Rune: ", c)
+	// 	str.write_encoded_rune(&pre_token, c)
+	// }
+	//
+	// fmt.println(tokens)
+	// if escape_next do fmt.println("Didn't close '\"'")
+	//
+	// return tokens[:]
 
+	// This is a simplified version, it wont split on "
+	sb := str.builder_make()
 	tokens := make([dynamic]string)
-	err: mem.Allocator_Error
-
-	pre_token: str.Builder
-	str.builder_init_none(&pre_token)
-	escape_next: bool = false
-
 	for c in line {
 
-		// If its escaped, write next rune regardless
-		if escape_next {
-			fmt.println("Escaped boi!")
-			str.write_encoded_rune(&pre_token, c)
-			escape_next = false
-			continue
+		// Split string and add to tokens.
+		if str.is_space(c) {
+			token, err := str.clone(str.to_string(sb))
+			if err != nil do token = ""
+			append(&tokens, token)
+			str.builder_destroy(&sb)
+			sb = str.builder_make()
 		}
-		// If its a splitter:
-		if raven_delim_split(c) {
-			fmt.println("Splitter, writing token:", pre_token)
-			// Turn pre_token into real token!
-			append(&tokens, str.to_string(pre_token))
-			str.builder_destroy(&pre_token)
-			str.builder_init_none(&pre_token)
-			continue
-		}
-
-		if c == '\\' {
-			fmt.println("Next Char is escapted")
-			escape_next = true
-			continue
-		}
-
-		// Add it to the pre_token string.
-		fmt.println("Writing Encoded Rune: ", c)
-		str.write_encoded_rune(&pre_token, c)
 	}
 
-	fmt.println(tokens)
-	if escape_next do fmt.println("Didn't close '\"'")
-
 	return tokens[:]
-	// This is a simplified version, it wont split on "
-	// tokens, err = str.fields_proc(line, raven_delim_split)
+	// tokens, err := str.fields_proc(line, _raven_split)
+	// // tokens, err := str.fields_proc(line, raven_delim_split)
 	// if err != nil {
 	// 	panic("Seem to have goofed here - STR FIELDS PROC")
 	// }
 	//
 	// return tokens
 }
+
+_raven_split :: proc(r: rune) -> bool {return str.contains_rune(" ", r)}
 
 raven_delim_split :: proc(r: rune) -> bool {return str.contains_rune(RAVEN_TOK_DELIM, r)}
 

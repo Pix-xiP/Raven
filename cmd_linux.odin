@@ -10,6 +10,7 @@ import "core:slice"
 import str "core:strings"
 import uni "core:unicode"
 import "core:strconv"
+import "./core_utils/echo"
 
 
 E_NONE: Errno : 0 // NO ERROR BBY
@@ -198,8 +199,7 @@ _raven_kill :: proc(args: []string) -> Errno {
 }
 
 _raven_echo :: proc(args: []string) -> Errno {
-	fmt.println(args) // TODO: Lmao.. not like this
-
+	echo.echo(args[1:])
 	return E_NONE
 }
 
