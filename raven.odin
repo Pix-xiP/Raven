@@ -1,12 +1,12 @@
 package raven
 
+import "core:bufio"
+import "core:bytes"
 import "core:fmt"
+import "core:io"
 import "core:mem"
 import "core:os"
-import "core:io"
-import "core:bytes"
 import str "core:strings"
-import "core:bufio"
 
 RAVEN_STD_BUFSIZE :: 256
 RAVEN_TOK_BUFSIZE :: 64
@@ -35,7 +35,7 @@ main :: proc() {
 	}
 
 	// Starting shell forever loop here.
-	// raven_shell_loop()
+	raven_shell_loop()
 }
 
 // Ideas...

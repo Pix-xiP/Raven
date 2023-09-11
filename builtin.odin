@@ -3,10 +3,10 @@ package raven
 import "core:fmt"
 import "core:os"
 // import "core:os/os2"
-import "core:sys/unix"
-import "core:strings"
-import "core:slice"
 import _c "core:c"
+import "core:slice"
+import "core:strings"
+import "core:sys/unix"
 
 
 // This for launch - should move to LIBC using systems IE darwin/linux
