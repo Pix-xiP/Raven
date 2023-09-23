@@ -92,6 +92,7 @@ raven_cd :: proc(args: []string) -> bool {
 }
 
 raven_ls :: proc(args: []string) -> bool {
+	fmt.println("HI")
 	_raven_ls(args)
 	return true
 }

@@ -1,0 +1,31 @@
+version: 3
+
+tasks:
+  default:
+    cmds:
+      - echo "Use 'build' for a release, 'debug' for a debug on."
+    silent: false
+
+  build:
+    cmds:
+      - odin build . -o:speed
+    aliases:
+      - b 
+    generates:
+      - raven
+    silent: true
+
+  debug:
+    cmds:
+      - odin build . -o:none -debug -out:rsh
+      # - echo "Rebuilt! - Running can be interacted with!"
+      - ./rsh
+    aliases:
+      - d 
+    sources:
+      - ./**/*.odin
+    generates:
+      - raven 
+    silent: true
+
+interval: 1000ms

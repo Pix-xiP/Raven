@@ -1,9 +1,9 @@
-package coreutils
+package echo
 
+import sv "../system_vars"
 import "core:fmt"
 import "core:os"
 import "core:os/os2"
-import sv "../system_vars"
 import str "core:strings"
 
 PROGRAM_NAME :: "echo"

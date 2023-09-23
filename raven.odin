@@ -12,6 +12,12 @@ RAVEN_STD_BUFSIZE :: 256
 RAVEN_TOK_BUFSIZE :: 64
 RAVEN_TOK_DELIM :: " \t\r\n\a"
 
+Cli_Input :: struct {
+	// TODO: Test using a struct for input mapping?
+	line:   string,
+	tokens: [dynamic]string,
+}
+
 main :: proc() {
 	when ODIN_DEBUG {
 		track: mem.Tracking_Allocator
@@ -38,6 +44,7 @@ main :: proc() {
 	raven_shell_loop()
 }
 
+
 // Ideas...
 // Could do a stack based read in - pop and work backwards kind of deal? if whitespace etc.?
 
@@ -45,15 +52,27 @@ raven_shell_loop :: proc() {
 	line: string
 	args: []string
 	status: bool = true
-
+	// Step one: Get a basic version that can run simple commands
+	// 1.2: - Make sure it respects " and ' 
+	// Step two: Improve basic flow
+	// Step three: Build out functionality + ability to run arbritary programs
+	// 4: History?
+	// 5: Respecting Basic Prompts?
+	// 6: Check performance?
 	for status {
 		fmt.printf("> ")
 		line = raven_read_line()
 		defer delete(line)
 		args = raven_split_line(line)
-		defer delete(args)
+		defer {
+			for a in args {
+				delete(a)
+			}
+			delete(args)
+		}
 		status = raven_exec(args)
 	}
+	fmt.println("Done")
 }
 
 raven_read_line :: proc() -> string {
@@ -97,72 +116,47 @@ raven_read_line :: proc() -> string {
 }
 
 raven_split_line :: proc(line: string) -> []string {
-	//
-	// tokens := make([dynamic]string)
-	// err: mem.Allocator_Error
-	//
-	// pre_token: str.Builder
-	// str.builder_init_none(&pre_token)
-	// escape_next: bool = false
-	//
-	// for c in line {
-	//
-	// 	// If its escaped, write next rune regardless
-	// 	if escape_next {
-	// 		fmt.println("Escaped boi!")
-	// 		str.write_encoded_rune(&pre_token, c)
-	// 		escape_next = false
-	// 		continue
-	// 	}
-	// 	// If its a splitter:
-	// 	if raven_delim_split(c) {
-	// 		fmt.println("Splitter, writing token:", pre_token)
-	// 		// Turn pre_token into real token!
-	// 		append(&tokens, str.to_string(pre_token))
-	// 		str.builder_destroy(&pre_token)
-	// 		str.builder_init_none(&pre_token)
-	// 		continue
-	// 	}
-	//
-	// 	if c == '\\' {
-	// 		fmt.println("Next Char is escapted")
-	// 		escape_next = true
-	// 		continue
-	// 	}
-	//
-	// 	// Add it to the pre_token string.
-	// 	fmt.println("Writing Encoded Rune: ", c)
-	// 	str.write_encoded_rune(&pre_token, c)
-	// }
-	//
-	// fmt.println(tokens)
-	// if escape_next do fmt.println("Didn't close '\"'")
-	//
-	// return tokens[:]
-
-	// This is a simplified version, it wont split on "
-	sb := str.builder_make()
 	tokens := make([dynamic]string)
-	for c in line {
 
-		// Split string and add to tokens.
-		if str.is_space(c) {
-			token, err := str.clone(str.to_string(sb))
-			if err != nil do token = ""
-			append(&tokens, token)
-			str.builder_destroy(&sb)
-			sb = str.builder_make()
+	pre_token: str.Builder
+	str.builder_init_none(&pre_token)
+	escape_next: bool = false
+
+	token: str.Builder
+	str.builder_init_none(&token)
+
+	i: int = 0
+	for i < len(line) {
+		c := rune(line[i])
+		if line[i] == '"' {
+			str.write_rune(&token, c)
+			i += 1
+			for line[i] != '"' && i < len(line) {
+				str.write_rune(&token, rune(line[i]))
+				i += 1
+			}
+			if line[i] != '"' {
+				fmt.println("raven: Unclosed ', \", ")
+				return {}
+			}
+
 		}
+		if str.is_space(rune(line[i])) {
+			append(&tokens, str.clone(str.to_string(token)))
+			str.builder_destroy(&token)
+			str.builder_init_none(&token)
+			i += 1
+			continue
+		}
+
+		// If nothing else - write the character.
+		str.write_rune(&token, c)
+		i += 1
 	}
+	append(&tokens, str.clone(str.to_string(token)))
+	str.builder_destroy(&token)
 
 	return tokens[:]
-	// tokens, err := str.fields_proc(line, _raven_split)
-	// // tokens, err := str.fields_proc(line, raven_delim_split)
-	// if err != nil {
-	// 	panic("Seem to have goofed here - STR FIELDS PROC")
-	// }
-	//
-	// return tokens
 }
 
 _raven_split :: proc(r: rune) -> bool {return str.contains_rune(" ", r)}
@@ -177,6 +171,7 @@ raven_exec :: proc(args: []string) -> bool {
 	for i in 0 ..< len(args) {
 		exec := raven_builtin_fn[args[i]]
 		if exec != nil {
+			fmt.println("Running builtin")
 			exec(args)
 			break
 		} else {

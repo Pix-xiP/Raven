@@ -1,6 +1,5 @@
 package system_vars
 
-
 HELP_OPTION_DESC: string : `
   --help      display this help and exit
 `
