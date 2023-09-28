@@ -205,7 +205,7 @@ _raven_echo :: proc(args: []string) -> Errno {
 
 // Quit the shell
 _raven_exit :: proc(args: []string) -> Errno {
-	err := intr.syscall(unix.SYS_exit)
+	err := intr.syscall(unix.SYS_exit) // should just die here.
 	if err != 0 {
 		return Errno(err)
 	}
